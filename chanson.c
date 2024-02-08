@@ -1,18 +1,18 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h> // malloc, free
+#include <string.h> // strcmp
+#include <stdio.h>  // printf, scanf
+#include <unistd.h> // sleep
 #include "chanson.h"
 
-Chanson * initChanson(char* titre, char* artiste, unsigned int duree){
-    Chanson * maChanson = NULL;
+Chanson *initChanson(char *titre, char *artiste, unsigned int duree) {
+    Chanson *maChanson = NULL;
     // Allocation dynamique
     maChanson = malloc(sizeof(Chanson));
 
     // initialisation data
-    maChanson->duree = duree;
     strcpy(maChanson->titre, titre);
-    strcpy(maChanson->artiste,artiste);
+    strcpy(maChanson->artiste, artiste);
+    maChanson->duree = duree;
 
     // initialisation lien
     maChanson->next = NULL;
@@ -20,66 +20,70 @@ Chanson * initChanson(char* titre, char* artiste, unsigned int duree){
 
     // return
     return maChanson;
-
 }
 
-void lectureEnCours(Chanson * ajouer){
+void lectureEnCours(Chanson *ajouer) {
     int choix;
-    while (ajouer!=NULL) {
+    while (ajouer != NULL) {
         printf("Titre en cours de  lecture \n");
         printf("%s \n", ajouer->titre);
         printf("%s \n", ajouer->artiste);
-        //sleep(ajouer->duree);
+        //sleep(ajouer->duree); /
         printf("1: next, 2: prev: 3: exit \n");
         scanf("%d", &choix);
         switch (choix) {
             case 1:
-                ajouer=ajouer->next;
+                ajouer = ajouer->next;
                 break;
             case 2:
-                ajouer=ajouer->prev;
+                ajouer = ajouer->prev;
                 break;
             case 3:
                 return;
+            default:
+                break;
+        }
+
+        if(ajouer==NULL){
+            printf("\n Fin de la playlist \n");
         }
     }
 }
 
 
-void addFirst(Playlist *fileAttente, char* titre, char* artiste, unsigned int duree){
+void addFirst(Playlist *fileAttente, char *titre, char *artiste, unsigned int duree) {
     // Allocation
-    Chanson * arajouter = initChanson(titre, artiste, duree);
-    arajouter->next  = *fileAttente;
-    if(*fileAttente!=NULL){
-    (*fileAttente)->prev = arajouter;
+    Chanson *arajouter = initChanson(titre, artiste, duree);
+    arajouter->next = *fileAttente;
+    if (*fileAttente != NULL) {
+        (*fileAttente)->prev = arajouter;
     }
     *fileAttente = arajouter;
 }
 
 
-void addLast(Chanson **filaAttente,char* titre, char* artiste, unsigned int duree){
+void addLast(Chanson **filaAttente, char *titre, char *artiste, unsigned int duree) {
     // Declaration d'un pointeur vers la tête de la liste
-    Chanson * tail = *filaAttente;
+    Chanson *tail = *filaAttente;
 
     // Allocation
-    Chanson * newChanson  = initChanson(titre, artiste, duree);
+    Chanson *newChanson = initChanson(titre, artiste, duree);
 
     // recherche du dernier maillon
-    while(tail->next!=NULL){
-        tail= tail->next;
+    while (tail->next != NULL) {
+        tail = tail->next;
     }
 
     // on est sur d'etre à la fin
     tail->next = newChanson;
-
+    newChanson->prev = tail;
 }
 
-
-void deletePlaylist(Chanson **fileattente){
+void deletePlaylist(Chanson **fileattente) {
     // pointeur temporaire
-    Chanson * temp = *fileattente;
+    Chanson *temp = *fileattente;
 
-    while (temp!=NULL) {
+    while (temp != NULL) {
         // mise à jour de la tête
         (*fileattente) = (*fileattente)->next;
 
@@ -91,12 +95,15 @@ void deletePlaylist(Chanson **fileattente){
 
 }
 
-
-void deleteByArtist(Chanson **playlist, char * artistName ){
+// Version pour list simplement chainée
+void deleteByArtist(Chanson **playlist, char *artistName) {
     Chanson *prev = *playlist;
 
-    if(*playlist!=NULL) {
+    if (*playlist != NULL) {
+        // il y a au moins une chanson
         Chanson *aEffacer = prev->next;
+
+        // on cherche dans tous les éléménts à droite du premier maillon
         while (aEffacer != NULL) {
             if (strcmp(aEffacer->artiste, artistName) == 0) {
                 prev->next = aEffacer->next;
@@ -108,6 +115,7 @@ void deleteByArtist(Chanson **playlist, char * artistName ){
             }
         }
 
+        // on vérifie si le premier maillon doit être effacé.
         if (strcmp((*playlist)->artiste, artistName) == 0) {
             prev = *playlist;
             *playlist = (*playlist)->next;
