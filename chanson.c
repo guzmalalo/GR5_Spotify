@@ -53,44 +53,64 @@ void lectureEnCours(Chanson *ajouer) {
 
 void addFirst(Playlist *fileAttente, char *titre, char *artiste, unsigned int duree) {
     // Allocation
-    Chanson *arajouter = initChanson(titre, artiste, duree);
-    arajouter->next = *fileAttente;
-    if (*fileAttente != NULL) {
-        (*fileAttente)->prev = arajouter;
+    Chanson *newSong = initChanson(titre, artiste, duree);
+
+    if(*fileAttente == NULL){
+        newSong->next = newSong;
+        newSong->prev = newSong;
+        *fileAttente = newSong;
+
+    }else{
+
+    newSong->next = *fileAttente;
+    newSong->prev = (*fileAttente)->prev;
+
+    newSong->next->prev = newSong;
+    newSong->prev->next = newSong;
+
+    *fileAttente = newSong;
     }
-    *fileAttente = arajouter;
+
+
 }
 
 
-void addLast(Chanson **filaAttente, char *titre, char *artiste, unsigned int duree) {
-    // Declaration d'un pointeur vers la tête de la liste
-    Chanson *tail = *filaAttente;
-
+void addLast(Chanson **fileAttente, char *titre, char *artiste, unsigned int duree) {
     // Allocation
-    Chanson *newChanson = initChanson(titre, artiste, duree);
+    Chanson *newSong = initChanson(titre, artiste, duree);
 
-    // recherche du dernier maillon
-    while (tail->next != NULL) {
-        tail = tail->next;
+    if(*fileAttente == NULL){
+        newSong->next = newSong;
+        newSong->prev = newSong;
+        *fileAttente = newSong;
+
+    }else{
+
+        newSong->next = *fileAttente;
+        newSong->prev = (*fileAttente)->prev;
+
+        newSong->next->prev = newSong;
+        newSong->prev->next = newSong;
+
     }
-
-    // on est sur d'etre à la fin
-    tail->next = newChanson;
-    newChanson->prev = tail;
 }
 
-void deletePlaylist(Chanson **fileattente) {
-    // pointeur temporaire
-    Chanson *temp = *fileattente;
+void deletePlaylist(Chanson **playList) {
 
-    while (temp != NULL) {
-        // mise à jour de la tête
-        (*fileattente) = (*fileattente)->next;
+    if(*playList !=NULL){
 
-        // liberation
-        free(temp);
+        Chanson * toDelete =  NULL;
+        Chanson * current = (*playList)->prev;
 
-        temp = *fileattente;
+        while (current != *playList){
+            toDelete = current;
+            current = current->next;
+            free(toDelete);
+        }
+
+        free(*playList);
+        *playList = NULL;
+
     }
 
 }
